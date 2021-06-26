@@ -1,5 +1,5 @@
 {
-    "name": "neon/simple-http",
+    "name": "neon-php/simple-http",
     "description": "Simple Http interface for guzzle",
     "type": "library",
     "license": "MIT",
