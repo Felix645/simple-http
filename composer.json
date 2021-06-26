@@ -1,0 +1,21 @@
+{
+    "name": "neon/simple-http",
+    "description": "Simple Http interface for guzzle",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Felix Kuntscher",
+            "email": "felix.kuntscher@gmail.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "Neon\\Http\\": "./src"
+        }
+    },
+    "require": {
+        "php": ">=7.3",
+        "guzzlehttp/guzzle": "7.3"
+    }
+}
