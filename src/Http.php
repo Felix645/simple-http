@@ -5,9 +5,10 @@ namespace Neon\Http;
 
 
 use GuzzleHttp\Client;
-use GuzzleHttp\Exception\GuzzleException;
+use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Psr7\Utils;
 use Psr\Http\Message\ResponseInterface;
+use Throwable;
 
 
 class Http
@@ -109,7 +110,7 @@ class Http
      * @param string $uri
      * @param array $form_data
      *
-     * @throws GuzzleException
+     * @throws Exceptions\RequestException
      *
      * @return Response
      */
@@ -124,7 +125,7 @@ class Http
      * @param string $uri
      * @param array $form_data
      *
-     * @throws GuzzleException
+     * @throws Exceptions\RequestException
      *
      * @return Response
      */
@@ -139,7 +140,7 @@ class Http
      * @param string $uri
      * @param array $form_data
      *
-     * @throws GuzzleException
+     * @throws Exceptions\RequestException
      *
      * @return Response
      */
@@ -154,7 +155,7 @@ class Http
      * @param string $uri
      * @param array $form_data
      *
-     * @throws GuzzleException
+     * @throws Exceptions\RequestException
      *
      * @return Response
      */
@@ -169,7 +170,7 @@ class Http
      * @param string $uri
      * @param array $form_data
      *
-     * @throws GuzzleException
+     * @throws Exceptions\RequestException
      *
      * @return Response
      */
@@ -245,17 +246,25 @@ class Http
      * @param string $uri
      * @param array $form_data
      *
-     * @throws GuzzleException
+     * @throws Exceptions\RequestException
      *
      * @return Response
      */
     private function buildRequest(string $method, string $uri, array $form_data = []) : Response
     {
-        $this->request_body = $this->request_body ?? + $form_data;
+        $this->request_body = $this->request_body + $form_data;
 
         $options = $this->buildOptions();
 
-        $response = $this->guzzle->request($method, $uri, $options);
+        $uri = isset(self::$base_url) ? self::$base_url . $uri : $uri;
+
+        try {
+            $response = $this->guzzle->request($method, $uri, $options);
+        } catch(RequestException $e) {
+            $response = $e->getResponse();
+        } catch(Throwable $e) {
+            throw new Exceptions\RequestException($e->getMessage());
+        }
 
         return $this->buildResponseObject($response);
     }

@@ -56,7 +56,7 @@ class Http
             throw new FacadeException(self::$accessor, $method);
         }
 
-        return $instance->$method($arguments);
+        return $instance->$method(...$arguments);
     }
 
     /**

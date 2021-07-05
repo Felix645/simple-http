@@ -81,7 +81,7 @@ class Response
      */
     public function json() : array
     {
-        $json = json_decode($this->body());
+        $json = json_decode($this->body(), true);
 
         if (json_last_error() !== JSON_ERROR_NONE) {
             throw new RequestException('Fetched body is not a json string');
