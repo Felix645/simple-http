@@ -91,6 +91,16 @@ class Response
     }
 
     /**
+     * Gets the response status code.
+     *
+     * @return int
+     */
+    public function code() : int
+    {
+        return $this->response->getStatusCode();
+    }
+
+    /**
      * Checks if the request was successful.
      *
      * @param void

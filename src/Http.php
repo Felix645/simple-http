@@ -21,6 +21,13 @@ class Http
     private static $base_url = null;
 
     /**
+     * Identifier if framework method should be used.
+     *
+     * @var bool
+     */
+    private static $use_framework_methods = false;
+
+    /**
      * GET request method string.
      *
      * @var string
@@ -146,6 +153,11 @@ class Http
      */
     public function put(string $uri, array $form_data = []) : Response
     {
+        if( self::$use_framework_methods ) {
+            $this->addParam('_method', 'put');
+            return $this->post($uri, $form_data);
+        }
+
         return $this->buildRequest(self::PUT, $uri, $form_data);
     }
 
@@ -161,6 +173,11 @@ class Http
      */
     public function patch(string $uri, array $form_data = []) : Response
     {
+        if( self::$use_framework_methods ) {
+            $this->addParam('_method', 'patch');
+            return $this->post($uri, $form_data);
+        }
+
         return $this->buildRequest(self::PATCH, $uri, $form_data);
     }
 
@@ -176,6 +193,11 @@ class Http
      */
     public function delete(string $uri, array $form_data = []) : Response
     {
+        if( self::$use_framework_methods ) {
+            $this->addParam('_method', 'delete');
+            return $this->post($uri, $form_data);
+        }
+
         return $this->buildRequest(self::DELETE, $uri, $form_data);
     }
 
@@ -234,7 +256,7 @@ class Http
     {
         $this->has_files = true;
 
-        $this->files[$key] = new File($filename, $file_path);
+        $this->files[$key][] = new File($filename, $file_path);
 
         return $this;
     }
@@ -346,14 +368,27 @@ class Http
      */
     private function multipartAddFile(array $options) : array
     {
-        foreach( $this->files as $key => $file ) {
-            if( $file instanceof File ) {
-                $options['multipart'][] = [
-                    'name' => $key,
-                    'contents' => Utils::tryFopen($file->getFilePath(), 'r'),
-                    'filename' => $file->getName()
-                ];
+        foreach( $this->files as $key => $files ) {
+            if( is_array($files) ) {
+                foreach($files as $file) {
+                    $options = $this->addSingleFileToOptions($key, $file, $options);
+                }
             }
+
+            $options = $this->addSingleFileToOptions($key, $files, $options);
+        }
+
+        return $options;
+    }
+
+    private function addSingleFileToOptions(string $key, $file, array $options) : array
+    {
+        if( $file instanceof File ) {
+            $options['multipart'][] = [
+                'name' => $key,
+                'contents' => Utils::tryFopen($file->getFilePath(), 'r'),
+                'filename' => $file->getName()
+            ];
         }
 
         return $options;
@@ -369,5 +404,17 @@ class Http
     public static function setBaseURL(string $url)
     {
         self::$base_url = $url;
+    }
+
+    /**
+     * Sets the identifier for the framework methods.
+     *
+     * @param bool $value
+     *
+     * @return void
+     */
+    public static function setFrameworkMethod(bool $value)
+    {
+        self::$use_framework_methods = $value;
     }
 }
