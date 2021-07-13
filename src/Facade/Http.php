@@ -30,6 +30,8 @@ use Neon\Http\Exceptions\FacadeException;
  * @uses \Neon\Http\Http::bearer()
  * @uses \Neon\Http\Http::addParam()
  * @uses \Neon\Http\Http::file()
+ * @uses \Neon\Http\Http::setBaseURL()
+ * @uses \Neon\Http\Http::setFrameworkMethod()
  */
 class Http
 {
@@ -56,7 +58,7 @@ class Http
             throw new FacadeException(self::$accessor, $method);
         }
 
-        return $instance->$method($arguments);
+        return $instance->$method(...$arguments);
     }
 
     /**
@@ -68,6 +70,18 @@ class Http
      */
     public static function setBaseURL(string $url) : void
     {
-        \Neon\Http\Http::setBaseURL($url);
+        self::$accessor::setBaseURL($url);
+    }
+
+    /**
+     * Sets the identifier for the framework methods.
+     *
+     * @param bool $value
+     *
+     * @return void
+     */
+    public static function setFrameworkMethod(bool $value)
+    {
+        self::$accessor::setFrameworkMethod($value);
     }
 }

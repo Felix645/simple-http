@@ -81,13 +81,23 @@ class Response
      */
     public function json() : array
     {
-        $json = json_decode($this->body());
+        $json = json_decode($this->body(), true);
 
         if (json_last_error() !== JSON_ERROR_NONE) {
             throw new RequestException('Fetched body is not a json string');
         }
 
         return $json;
+    }
+
+    /**
+     * Gets the response status code.
+     *
+     * @return int
+     */
+    public function code() : int
+    {
+        return $this->response->getStatusCode();
     }
 
     /**

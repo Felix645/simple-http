@@ -5,10 +5,11 @@ namespace Neon\Http;
 
 
 use GuzzleHttp\Client;
-use GuzzleHttp\Exception\GuzzleException;
+use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Psr7\Utils;
 use GuzzleHttp\RequestOptions;
 use Psr\Http\Message\ResponseInterface;
+use Throwable;
 
 
 class Http
@@ -19,6 +20,13 @@ class Http
      * @var null|string
      */
     private static $base_url = null;
+
+    /**
+     * Identifier if framework method should be used.
+     *
+     * @var bool
+     */
+    private static $use_framework_methods = false;
 
     /**
      * GET request method string.
@@ -110,7 +118,7 @@ class Http
      * @param string $uri
      * @param array $form_data
      *
-     * @throws GuzzleException
+     * @throws Exceptions\RequestException
      *
      * @return Response
      */
@@ -125,7 +133,7 @@ class Http
      * @param string $uri
      * @param array $form_data
      *
-     * @throws GuzzleException
+     * @throws Exceptions\RequestException
      *
      * @return Response
      */
@@ -140,12 +148,17 @@ class Http
      * @param string $uri
      * @param array $form_data
      *
-     * @throws GuzzleException
+     * @throws Exceptions\RequestException
      *
      * @return Response
      */
     public function put(string $uri, array $form_data = []) : Response
     {
+        if( self::$use_framework_methods ) {
+            $this->addParam('_method', 'put');
+            return $this->post($uri, $form_data);
+        }
+
         return $this->buildRequest(self::PUT, $uri, $form_data);
     }
 
@@ -155,12 +168,17 @@ class Http
      * @param string $uri
      * @param array $form_data
      *
-     * @throws GuzzleException
+     * @throws Exceptions\RequestException
      *
      * @return Response
      */
     public function patch(string $uri, array $form_data = []) : Response
     {
+        if( self::$use_framework_methods ) {
+            $this->addParam('_method', 'patch');
+            return $this->post($uri, $form_data);
+        }
+
         return $this->buildRequest(self::PATCH, $uri, $form_data);
     }
 
@@ -170,12 +188,17 @@ class Http
      * @param string $uri
      * @param array $form_data
      *
-     * @throws GuzzleException
+     * @throws Exceptions\RequestException
      *
      * @return Response
      */
     public function delete(string $uri, array $form_data = []) : Response
     {
+        if( self::$use_framework_methods ) {
+            $this->addParam('_method', 'delete');
+            return $this->post($uri, $form_data);
+        }
+
         return $this->buildRequest(self::DELETE, $uri, $form_data);
     }
 
@@ -234,7 +257,7 @@ class Http
     {
         $this->has_files = true;
 
-        $this->files[$key] = new File($filename, $file_path);
+        $this->files[$key][] = new File($filename, $file_path);
 
         return $this;
     }
@@ -246,17 +269,25 @@ class Http
      * @param string $uri
      * @param array $form_data
      *
-     * @throws GuzzleException
+     * @throws Exceptions\RequestException
      *
      * @return Response
      */
     private function buildRequest(string $method, string $uri, array $form_data = []) : Response
     {
-        $this->request_body = $this->request_body ?? + $form_data;
+        $this->request_body = $this->request_body + $form_data;
 
         $options = $this->buildOptions();
 
-        $response = $this->guzzle->request($method, $uri, $options);
+        $uri = isset(self::$base_url) ? self::$base_url . $uri : $uri;
+
+        try {
+            $response = $this->guzzle->request($method, $uri, $options);
+        } catch(RequestException $e) {
+            $response = $e->getResponse();
+        } catch(Throwable $e) {
+            throw new Exceptions\RequestException($e->getMessage());
+        }
 
         return $this->buildResponseObject($response);
     }
@@ -344,14 +375,27 @@ class Http
      */
     private function multipartAddFile(array $options) : array
     {
-        foreach( $this->files as $key => $file ) {
-            if( $file instanceof File ) {
-                $options['multipart'][] = [
-                    'name' => $key,
-                    'contents' => Utils::tryFopen($file->getFilePath(), 'r'),
-                    'filename' => $file->getName()
-                ];
+        foreach( $this->files as $key => $files ) {
+            if( is_array($files) ) {
+                foreach($files as $file) {
+                    $options = $this->addSingleFileToOptions($key, $file, $options);
+                }
             }
+
+            $options = $this->addSingleFileToOptions($key, $files, $options);
+        }
+
+        return $options;
+    }
+
+    private function addSingleFileToOptions(string $key, $file, array $options) : array
+    {
+        if( $file instanceof File ) {
+            $options['multipart'][] = [
+                'name' => $key,
+                'contents' => Utils::tryFopen($file->getFilePath(), 'r'),
+                'filename' => $file->getName()
+            ];
         }
 
         return $options;
@@ -367,5 +411,17 @@ class Http
     public static function setBaseURL(string $url)
     {
         self::$base_url = $url;
+    }
+
+    /**
+     * Sets the identifier for the framework methods.
+     *
+     * @param bool $value
+     *
+     * @return void
+     */
+    public static function setFrameworkMethod(bool $value)
+    {
+        self::$use_framework_methods = $value;
     }
 }
