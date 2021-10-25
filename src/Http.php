@@ -7,6 +7,7 @@ namespace Neon\Http;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Psr7\Utils;
+use GuzzleHttp\RequestOptions;
 use Psr\Http\Message\ResponseInterface;
 use Throwable;
 
@@ -311,6 +312,12 @@ class Http
     private function buildOptions() : array
     {
         $options = [];
+
+        foreach( $this->request_body as $key => $value ) {
+            if( RequestOptions::QUERY === $key ) {
+                $options[RequestOptions::QUERY] = $value;
+            }
+        }
 
         if( !empty($this->request_body) && !$this->has_files ) {
             $options['form_params'] = $this->request_body;
