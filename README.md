@@ -1,6 +1,6 @@
 # simple-http
 
-## Installtion
+## Installation
 
 ```
 composer require neon-php/simple-http
@@ -207,7 +207,7 @@ The method *code* returns the http status code of the response:
 $code = $response->code();
 ```
 
-Additionally, there are several methods to check for specific pre defines status codes:
+Additionally, there are several methods to check for specific pre-defined status codes:
 
 ```php
 <?php
