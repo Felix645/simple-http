@@ -19,6 +19,13 @@ class Response
     private $response;
 
     /**
+     * Response body.
+     *
+     * @var string
+     */
+    private $body = '';
+
+    /**
      * Response constructor.
      *
      * @param ResponseInterface $response
@@ -59,7 +66,9 @@ class Response
      */
     public function body() : string
     {
-        return $this->response->getBody()->getContents();
+        $this->body = empty($this->body) ? $this->response->getBody()->getContents() : $this->body;
+
+        return $this->body;
     }
 
     /**
@@ -81,7 +90,9 @@ class Response
      */
     public function json() : array
     {
-        $json = json_decode($this->body(), true);
+        $body = empty($this->body) ? $this->body() : $this->body;
+
+        $json = json_decode($body, true);
 
         if (json_last_error() !== JSON_ERROR_NONE) {
             throw new RequestException('Fetched body is not a json string');
