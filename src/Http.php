@@ -8,7 +8,7 @@ use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Psr7\Utils;
 use GuzzleHttp\RequestOptions;
-use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ResponseInterface as GuzzleResponseInterface;
 use Throwable;
 
 
@@ -120,9 +120,9 @@ class Http
      *
      * @throws Exceptions\RequestException
      *
-     * @return Response
+     * @return ResponseInterface
      */
-    public function get(string $uri, array $form_data = []) : Response
+    public function get(string $uri, array $form_data = []) : ResponseInterface
     {
         return $this->buildRequest(self::GET, $uri, $form_data);
     }
@@ -135,9 +135,9 @@ class Http
      *
      * @throws Exceptions\RequestException
      *
-     * @return Response
+     * @return ResponseInterface
      */
-    public function post(string $uri, array $form_data = []) : Response
+    public function post(string $uri, array $form_data = []) : ResponseInterface
     {
         return $this->buildRequest(self::POST, $uri, $form_data);
     }
@@ -150,9 +150,9 @@ class Http
      *
      * @throws Exceptions\RequestException
      *
-     * @return Response
+     * @return ResponseInterface
      */
-    public function put(string $uri, array $form_data = []) : Response
+    public function put(string $uri, array $form_data = []) : ResponseInterface
     {
         if( self::$use_framework_methods ) {
             $this->addParam('_method', 'put');
@@ -170,9 +170,9 @@ class Http
      *
      * @throws Exceptions\RequestException
      *
-     * @return Response
+     * @return ResponseInterface
      */
-    public function patch(string $uri, array $form_data = []) : Response
+    public function patch(string $uri, array $form_data = []) : ResponseInterface
     {
         if( self::$use_framework_methods ) {
             $this->addParam('_method', 'patch');
@@ -190,9 +190,9 @@ class Http
      *
      * @throws Exceptions\RequestException
      *
-     * @return Response
+     * @return ResponseInterface
      */
-    public function delete(string $uri, array $form_data = []) : Response
+    public function delete(string $uri, array $form_data = []) : ResponseInterface
     {
         if( self::$use_framework_methods ) {
             $this->addParam('_method', 'delete');
@@ -271,9 +271,9 @@ class Http
      *
      * @throws Exceptions\RequestException
      *
-     * @return Response
+     * @return ResponseInterface
      */
-    private function buildRequest(string $method, string $uri, array $form_data = []) : Response
+    private function buildRequest(string $method, string $uri, array $form_data = []) : ResponseInterface
     {
         $this->request_body = $this->request_body + $form_data;
 
@@ -295,11 +295,11 @@ class Http
     /**
      * Builds a response object.
      *
-     * @param ResponseInterface $response
+     * @param GuzzleResponseInterface $response
      *
-     * @return Response
+     * @return ResponseInterface
      */
-    private function buildResponseObject(ResponseInterface $response) : Response
+    private function buildResponseObject(GuzzleResponseInterface $response) : ResponseInterface
     {
         return new Response($response);
     }

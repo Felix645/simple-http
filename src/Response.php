@@ -5,11 +5,11 @@ namespace Neon\Http;
 
 
 use Neon\Http\Exceptions\RequestException;
-use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ResponseInterface as GuzzleResponseInterface;
 use Psr\Http\Message\StreamInterface;
 
 
-class Response
+class Response implements ResponseInterface
 {
     /**
      * Guzzle response instance.
@@ -28,9 +28,9 @@ class Response
     /**
      * Response constructor.
      *
-     * @param ResponseInterface $response
+     * @param GuzzleResponseInterface $response
      */
-    public function __construct(ResponseInterface $response)
+    public function __construct(GuzzleResponseInterface $response)
     {
         $this->response = $response;
     }
@@ -38,9 +38,9 @@ class Response
     /**
      * Gets the raw guzzle response interface.
      *
-     * @return ResponseInterface
+     * @return GuzzleResponseInterface
      */
-    public function getRawResponse() : ResponseInterface
+    public function getRawResponse() : GuzzleResponseInterface
     {
         return $this->response;
     }
