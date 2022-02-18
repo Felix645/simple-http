@@ -36,6 +36,16 @@ class Response
     }
 
     /**
+     * Gets the raw guzzle response interface.
+     *
+     * @return ResponseInterface
+     */
+    public function getRawResponse() : ResponseInterface
+    {
+        return $this->response;
+    }
+
+    /**
      * Checks if given header exists in the response.
      *
      * @param string $header
