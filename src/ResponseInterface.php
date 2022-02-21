@@ -3,6 +3,7 @@
 namespace Neon\Http;
 
 use Neon\Http\Exceptions\RequestException;
+use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface as GuzzleResponseInterface;
 use Psr\Http\Message\StreamInterface;
 
@@ -14,6 +15,13 @@ interface ResponseInterface
      * @return GuzzleResponseInterface
      */
     public function getRawResponse() : GuzzleResponseInterface;
+
+    /**
+     * Gets the last request
+     *
+     * @return null|RequestInterface
+     */
+    public function getLastRequest() : ?RequestInterface;
 
     /**
      * Gets the original http request builder object.

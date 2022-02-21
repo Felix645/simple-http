@@ -61,6 +61,16 @@ class Response implements ResponseInterface
     }
 
     /**
+     * Gets the last request
+     *
+     * @return null|RequestInterface
+     */
+    public function getLastRequest() : ?RequestInterface
+    {
+        return $this->last_request;
+    }
+
+    /**
      * Gets the original http request builder object.
      *
      * @return Http
