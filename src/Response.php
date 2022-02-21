@@ -32,15 +32,22 @@ class Response implements ResponseInterface
     private $last_request;
 
     /**
+     * @var Http
+     */
+    private $original_request;
+
+    /**
      * Response constructor.
      *
      * @param GuzzleResponseInterface $response
      * @param RequestInterface|null $last_request
+     * @param Http $original_request
      */
-    public function __construct(GuzzleResponseInterface $response, ?RequestInterface $last_request)
+    public function __construct(GuzzleResponseInterface $response, ?RequestInterface $last_request, Http $original_request)
     {
         $this->response = $response;
         $this->last_request = $last_request;
+        $this->original_request = $original_request;
     }
 
     /**
@@ -51,6 +58,16 @@ class Response implements ResponseInterface
     public function getRawResponse() : GuzzleResponseInterface
     {
         return $this->response;
+    }
+
+    /**
+     * Gets the original http request builder object.
+     *
+     * @return Http
+     */
+    public function getOriginalHttpBuilder() : Http
+    {
+        return $this->original_request;
     }
 
     /**

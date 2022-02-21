@@ -74,6 +74,13 @@ class Http
     private $guzzle;
 
     /**
+     * Request method.
+     *
+     * @var string
+     */
+    private $method;
+
+    /**
      * The request body.
      *
      * @var array
@@ -292,6 +299,16 @@ class Http
     }
 
     /**
+     * Gets the request method that was used.
+     *
+     * @return string
+     */
+    public function getMethod() : string
+    {
+        return $this->method;
+    }
+
+    /**
      * Builds a request.
      *
      * @param string $method
@@ -304,6 +321,8 @@ class Http
      */
     private function buildRequest(string $method, string $uri, array $form_data = []) : ResponseInterface
     {
+        $this->method = $method;
+
         $this->request_body = $this->request_body + $form_data;
 
         $options = $this->buildOptions();
@@ -330,7 +349,7 @@ class Http
      */
     private function buildResponseObject(GuzzleResponseInterface $response) : ResponseInterface
     {
-        return new Response($response, $this->last_request);
+        return new Response($response, $this->last_request, $this);
     }
 
     /**

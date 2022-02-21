@@ -16,6 +16,13 @@ interface ResponseInterface
     public function getRawResponse() : GuzzleResponseInterface;
 
     /**
+     * Gets the original http request builder object.
+     *
+     * @return Http
+     */
+    public function getOriginalHttpBuilder() : Http;
+
+    /**
      * Gets the URL of the last redirect, if redirection tracking was enabled.
      *
      * @return string
