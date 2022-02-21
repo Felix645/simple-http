@@ -6,8 +6,11 @@ namespace Neon\Http;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
+use GuzzleHttp\HandlerStack;
+use GuzzleHttp\Middleware;
 use GuzzleHttp\Psr7\Utils;
 use GuzzleHttp\RequestOptions;
+use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface as GuzzleResponseInterface;
 use Throwable;
 
@@ -99,16 +102,42 @@ class Http
     private $headers = [];
 
     /**
+     * @var null|RequestInterface $last_request
+     */
+    private $last_request = null;
+
+    /**
      * Http constructor.
      */
-    public function __construct()
+    public function __construct(bool $with_redirects = false)
     {
-        if( is_null(self::$base_url) ) {
-            $this->guzzle = new Client();
+        if( $with_redirects ) {
+            $stack = HandlerStack::create();
+            $stack->push(Middleware::mapRequest(function (RequestInterface $request) {
+                $this->last_request = $request;
+                return $request;
+            }));
+
+            if( is_null(self::$base_url) ) {
+                $this->guzzle = new Client([
+                    'handler' => $stack,
+                    RequestOptions::ALLOW_REDIRECTS => true
+                ]);
+            } else {
+                $this->guzzle = new Client([
+                    'base_uri' => self::$base_url,
+                    'handler' => $stack,
+                    RequestOptions::ALLOW_REDIRECTS => true
+                ]);
+            }
         } else {
-            $this->guzzle = new Client([
-                'base_uri' => self::$base_url
-            ]);
+            if( is_null(self::$base_url) ) {
+                $this->guzzle = new Client();
+            } else {
+                $this->guzzle = new Client([
+                    'base_uri' => self::$base_url
+                ]);
+            }
         }
     }
 
@@ -301,7 +330,7 @@ class Http
      */
     private function buildResponseObject(GuzzleResponseInterface $response) : ResponseInterface
     {
-        return new Response($response);
+        return new Response($response, $this->last_request);
     }
 
     /**

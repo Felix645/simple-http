@@ -16,6 +16,13 @@ interface ResponseInterface
     public function getRawResponse() : GuzzleResponseInterface;
 
     /**
+     * Gets the URL of the last redirect, if redirection tracking was enabled.
+     *
+     * @return string
+     */
+    public function getRedirectUrl() : string;
+
+    /**
      * Checks if given header exists in the response.
      *
      * @param string $header

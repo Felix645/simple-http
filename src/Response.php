@@ -5,6 +5,7 @@ namespace Neon\Http;
 
 
 use Neon\Http\Exceptions\RequestException;
+use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface as GuzzleResponseInterface;
 use Psr\Http\Message\StreamInterface;
 
@@ -26,13 +27,20 @@ class Response implements ResponseInterface
     private $body = '';
 
     /**
+     * @var null|RequestInterface $last_request
+     */
+    private $last_request;
+
+    /**
      * Response constructor.
      *
      * @param GuzzleResponseInterface $response
+     * @param RequestInterface|null $last_request
      */
-    public function __construct(GuzzleResponseInterface $response)
+    public function __construct(GuzzleResponseInterface $response, ?RequestInterface $last_request)
     {
         $this->response = $response;
+        $this->last_request = $last_request;
     }
 
     /**
@@ -43,6 +51,20 @@ class Response implements ResponseInterface
     public function getRawResponse() : GuzzleResponseInterface
     {
         return $this->response;
+    }
+
+    /**
+     * Gets the URL of the last redirect, if redirection tracking was enabled.
+     *
+     * @return string
+     */
+    public function getRedirectUrl() : string
+    {
+        if( empty($this->last_request) ) {
+            return '';
+        }
+
+        return $this->last_request->getUri()->__toString();
     }
 
     /**

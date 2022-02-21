@@ -61,6 +61,11 @@ class Http
         return $instance->$method(...$arguments);
     }
 
+    public static function withRedirects() : \Neon\Http\Http
+    {
+        return new self::$accessor(true);
+    }
+
     /**
      * Sets the http base request url.
      *
